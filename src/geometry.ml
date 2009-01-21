@@ -43,14 +43,19 @@ let print_point surface color (x, y) =
 ;;
 
 (* Middle-point algorithm *)
-let print_line color line surface =
-  let ((x1, y1), (x2, y2)) = line in
-  let dy = y2 - y1 in
+let print_line color (p1, p2) surface =
+  let (_, y1) = p1 and (_, y2) = p2 in
+  let ((x_low, y_low), (x_high, y_high)) =
+    if y1 < y2 then
+      (p1, p2)
+    else
+      (p2, p1) in
+  let dy = y_high - y_low in
 
-  let apply d0 deltaE deltaNE chooseE chooseNE =
-    let x = ref x1 and y = ref y1 and dp = ref d0 in
-    print_point surface color (x1, y1);
-    while (!x < x2) do
+  let apply op d0 deltaE deltaNE chooseE chooseNE =
+    let x = ref x_low and y = ref y_low and dp = ref d0 in
+    print_point surface color (x_low, y_low);
+    while op (!x) x_high do
       if (!dp <= 0) then
         begin
           dp := !dp + deltaE;
@@ -63,39 +68,39 @@ let print_line color line surface =
         end;
       print_point surface color (!x, !y);
     done;
-    if !x == x2 && !y != y2 then
+    if !x == x_high && !y != y_high then
       begin
         print_point surface color (!x, !y);
-        while (!y < y2) do
+        while (!y < y_high) do
           y := !y + 1;
           print_point surface color (!x, !y);
         done;
       end
   in
 
-  match x2 >= x1 with
+  match x_high >= x_low with
   | true ->
       begin
-        let dx = x2 - x1 in
+        let dx = x_high - x_low in
         match dx >= dy with
         | true ->
-            apply (2*dy-dx) (2*dy) (2*(dy-dx))
+            apply (<) (2*dy-dx) (2*dy) (2*(dy-dx))
               (fun x y -> x := !x + 1)
               (fun x y -> x := !x + 1; y := !y + 1)
         | false ->
-            apply (2*dx-dy) (2*dx) (2*(dx-dy))
-              (fun x y -> x := !x + 1)
+            apply (<) (2*dx-dy) (2*dx) (2*(dx-dy))
+              (fun x y -> y := !y + 1)
               (fun x y -> x := !x + 1; y := !y + 1)
       end
   | false ->
-      let dx = x1 - x2 in
+      let dx = x_low - x_high in
       match dx >= dy with
       | true ->
-          apply (2*dy-dx) (2*dy) (2*(dy-dx))
-            (fun x y -> x := !x + 1)
-            (fun x y -> x := !x + 1; y := !y + 1)
+          apply (>) (2*dy-dx) (2*dy) (2*(dy-dx))
+            (fun x y -> x := !x - 1)
+            (fun x y -> x := !x - 1; y := !y + 1)
       | false ->
-          apply (2*dx-dy) (2*dx) (2*(dx-dy))
-            (fun x y -> x := !x + 1)
-            (fun x y -> x := !x + 1; y := !y + 1)
+          apply (>) (2*dx-dy) (2*dx) (2*(dx-dy))
+            (fun x y -> y := !y + 1)
+            (fun x y -> x := !x - 1; y := !y + 1)
 ;;
