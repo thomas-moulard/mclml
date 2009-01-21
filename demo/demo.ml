@@ -20,19 +20,24 @@ let init () =
 
 let mouse_add_obstacle world point =
   let (x_prev, _) = !point
-  and mouse = mouse_pos () in
+  and (xm, ym) = mouse_pos () in
+  let mouse = (xm, win_height - ym) in
   let valid_position (x, y) =
     x >= 0 && x < win_width && y >= 0 && y < win_height
-      && not (eq_point !point mouse) in
-  if button_down () && valid_position mouse then
-    if x_prev >= 0 then
-      begin
-        let line = (!point, mouse) in
-        make_obstacle world line;
-        point := (-1, -1)
-      end
-    else
-      point := mouse
+      && not (eq_point !point mouse)
+      && x_prev >= -1 in
+  begin
+    match (x_prev, button_down () && valid_position mouse) with
+    | (-2, _) -> if not (button_down ()) then point := (-1, -1)
+    | (_, true) ->
+        if x_prev < 0 then
+          point := mouse
+        else
+          let line = (!point, mouse) in
+          make_obstacle world line;
+          point := (-2, -2);
+    | (_, _) -> ()
+  end;
 ;;
 
 let main () =

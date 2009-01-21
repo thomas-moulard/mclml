@@ -1,6 +1,7 @@
 (* Generic geometry related stuff *)
 
 open Graphics;;
+open Format;;
 
 type point = int * int;;
 
@@ -15,6 +16,18 @@ type box = {
     width : int;
     height : int;
   }
+;;
+
+let printpoint (x, y) =
+  printf "@[(%d,@ %d)@]" x y
+;;
+
+let printline (p1, p2) =
+  printf "@[";
+  printpoint p1;
+  printf "@ ";
+  printpoint p2;
+  printf "@]"
 ;;
 
 let make_box pt w h = {
