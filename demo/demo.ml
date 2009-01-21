@@ -5,6 +5,7 @@ open Graphics;;
 
 open Geometry;;
 open Render;;
+open Robot;;
 open Simulation;;
 
 let win_width = 640;;
@@ -48,9 +49,15 @@ let main () =
     ((0, 0), (0, pred win_height));
     ((0, pred win_height), (pred win_width, pred win_height));
     ((pred win_width, 0), (pred win_width, pred win_height));
-  ] in
+  ] [] in
+  add_robot world (make_robot [] [make_virtual_actuators world (0, 0, 0)]);
+
+  (* Move robot *)
+  (List.nth world.robots 0).pos <- (win_width/2, win_height/2, 0);
+
   while true do
     mouse_add_obstacle world obstacle;
+    update_world world;
     draw_image (render world win_box) 0 0;
     synchronize ();
   done;

@@ -18,15 +18,15 @@ type box = {
   }
 ;;
 
-let printpoint (x, y) =
+let print_point (x, y) =
   printf "@[(%d,@ %d)@]" x y
 ;;
 
-let printline (p1, p2) =
+let print_line (p1, p2) =
   printf "@[";
-  printpoint p1;
+  print_point p1;
   printf "@ ";
-  printpoint p2;
+  print_point p2;
   printf "@]"
 ;;
 
@@ -38,12 +38,12 @@ let make_box pt w h = {
 
 let get_point surface x y = surface.(y).(x)
 
-let print_point surface color (x, y) =
+let draw_point surface color (x, y) =
   surface.(y).(x) <- color;
 ;;
 
 (* Middle-point algorithm *)
-let print_line color (p1, p2) surface =
+let draw_line color (p1, p2) surface =
   let (_, y1) = p1 and (_, y2) = p2 in
   let ((x_low, y_low), (x_high, y_high)) =
     if y1 < y2 then
@@ -54,7 +54,7 @@ let print_line color (p1, p2) surface =
 
   let apply op d0 deltaE deltaNE chooseE chooseNE =
     let x = ref x_low and y = ref y_low and dp = ref d0 in
-    print_point surface color (x_low, y_low);
+    draw_point surface color (x_low, y_low);
     while op (!x) x_high do
       if (!dp <= 0) then
         begin
@@ -66,14 +66,14 @@ let print_line color (p1, p2) surface =
           dp := !dp + deltaNE;
           chooseNE x y
         end;
-      print_point surface color (!x, !y);
+      draw_point surface color (!x, !y);
     done;
     if !x == x_high && !y != y_high then
       begin
-        print_point surface color (!x, !y);
+        draw_point surface color (!x, !y);
         while (!y < y_high) do
           y := !y + 1;
-          print_point surface color (!x, !y);
+          draw_point surface color (!x, !y);
         done;
       end
   in
