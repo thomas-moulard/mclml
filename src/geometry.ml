@@ -7,10 +7,6 @@ let pi = 3.1415926535897932384626433832795028841971693992;;
 
 type point = int * int;;
 
-let eq_point (x1, y1) (x2, y2) =
-  x1 == x2 && y1 == y2
-;;
-
 type line = point * point;;
 
 type box = {
@@ -18,6 +14,18 @@ type box = {
     width : int;
     height : int;
   }
+;;
+
+let eq_point (x1, y1) (x2, y2) =
+  x1 == x2 && y1 == y2
+;;
+
+let wrap_angle = (mod) 360;;
+
+
+let euclidian_distance (x1, y1) (x2, y2) =
+  let d1 = x1 - y1 and d2 = x2 - y2 in
+  int_of_float (sqrt (float_of_int (d1 * d1 + d2 * d2)))
 ;;
 
 let gradient_of_degree x = x *. 2. *. pi /. 360.;;
@@ -46,8 +54,9 @@ let draw_point surface color (x, y) =
   surface.(y).(x) <- color;
 ;;
 
+
 (* Middle-point algorithm *)
-let draw_line color (p1, p2) surface =
+let middle_point_algorithm (p1, p2) point_fun =
   let (_, y1) = p1 and (_, y2) = p2 in
   let ((x_low, y_low), (x_high, y_high)) =
     if y1 < y2 then
@@ -58,7 +67,7 @@ let draw_line color (p1, p2) surface =
 
   let apply op d0 deltaE deltaNE chooseE chooseNE =
     let x = ref x_low and y = ref y_low and dp = ref d0 in
-    draw_point surface color (x_low, y_low);
+    point_fun (x_low, y_low);
     while op (!x) x_high do
       if (!dp <= 0) then
         begin
@@ -70,14 +79,14 @@ let draw_line color (p1, p2) surface =
           dp := !dp + deltaNE;
           chooseNE x y
         end;
-      draw_point surface color (!x, !y);
+      point_fun (!x, !y);
     done;
     if !x == x_high && !y != y_high then
       begin
-        draw_point surface color (!x, !y);
+        point_fun (!x, !y);
         while (!y < y_high) do
           y := !y + 1;
-          draw_point surface color (!x, !y);
+          point_fun (!x, !y);
         done;
       end
   in
@@ -109,6 +118,22 @@ let draw_line color (p1, p2) surface =
             (fun x y -> x := !x - 1; y := !y + 1)
 ;;
 
+let points_from_line line =
+  let res = ref [] in
+  middle_point_algorithm line (fun p -> res := p::(!res));
+  !res
+;;
+
+let draw_line color line surface =
+  middle_point_algorithm line (draw_point surface color)
+;;
+
+let point_from_position (x, y, theta) r =
+  let t = gradient_of_degree (float_of_int theta) in
+  let x_ = (cos t) *. (float_of_int r) +. float_of_int x
+  and y_ = (sin t) *. (float_of_int r) +. float_of_int y in
+  (int_of_float x_, int_of_float y_)
+;;
 
 let draw_circle surface color (x, y) r =
   let step = 1. /. (float_of_int r)
@@ -124,8 +149,6 @@ let draw_circle surface color (x, y) r =
 
 let draw_position surface color (x, y, theta) r =
   draw_circle surface color (x, y) r;
-  let theta_ = gradient_of_degree (float_of_int theta) in
-  let x_ = (cos theta_) *. (float_of_int r) +. float_of_int x
-  and y_ = (sin theta_) *. (float_of_int r) +. float_of_int y in
-  draw_line color ((x, y), (int_of_float x_, int_of_float y_)) surface
+  let p = point_from_position (x, y, theta) r in
+  draw_line color ((x, y), p) surface
 ;;

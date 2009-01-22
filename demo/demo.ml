@@ -57,21 +57,30 @@ let main () =
   let (robot, _, _, _) = robot_cfg in
   add_actuator robot (make_virtual_speed_actuator world robot_cfg (0, 0, 0));
   add_actuator robot (make_virtual_angle_actuator world robot_cfg (0, 0, 0));
+  add_dist_sensor robot
+    (make_virtual_distance_sensor world robot_cfg (0, 0, 0));
 
   robot.pos <- (win_width/2, win_height/2, 0);
 
   let speed_actuator = List.nth robot.actuators 1
   and angle_actuator = List.nth robot.actuators 0 in
-  speed_actuator 1; angle_actuator 0;
+  speed_actuator 0; angle_actuator 0;
 
   (* Main loop *)
-  while true do
-    mouse_add_obstacle world obstacle;
-    update_world world;
-    draw_image (render world win_box) 0 0;
-    synchronize ();
-  done;
-  close_graph ()
+  try
+    while true do
+      let dist = (List.nth robot.dist_sensors 0) () in
+      if dist == max_int then
+        printf "No obstacle.@."
+      else
+        printf "Obstacle (distance: %d)@." dist;
+
+      mouse_add_obstacle world obstacle;
+      update_world world;
+      draw_image (render world win_box) 0 0;
+      synchronize ();
+    done;
+  with Graphic_failure _ -> close_graph ()
 ;;
 
 main ()
