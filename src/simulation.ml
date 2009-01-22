@@ -5,7 +5,9 @@ open Robot;;
 
 type world = {
     mutable obstacles : line list;
-    mutable robots : (robot * int) list;
+
+    (* robot * radius * linear speed * angular speed *)
+    mutable robots : (robot * int * int ref * int ref) list;
   }
 ;;
 
@@ -30,13 +32,21 @@ let make_virtual_actuators world position =
   fun n -> () (* FIXME: *)
 ;;
 
+
+let move position linear_speed angular_speed =
+  let (x, y, theta) = position in
+  let theta_ = gradient_of_degree (float_of_int theta) in
+  let x_ = (cos theta_) *. (float_of_int linear_speed) +. float_of_int x
+  and y_ = (sin theta_) *. (float_of_int linear_speed) +. float_of_int y in
+  (int_of_float x_, int_of_float y_, theta + angular_speed)
+;;
+
 let update_world world =
   let rec update_robots = function
     | [] -> ()
-    | robot::robots ->
-        (* FIXME: move robots,
-           virtual actuators should set a hook or something
-           to be able to move the robot here. *)
+    | robot_data::robots ->
+        let (robot, _, linear_speed, angular_speed) = robot_data in
+        robot.pos <- move robot.pos !linear_speed !angular_speed;
         update_robots robots in
   update_robots world.robots
 ;;

@@ -50,10 +50,12 @@ let main () =
     ((0, pred win_height), (pred win_width, pred win_height));
     ((pred win_width, 0), (pred win_width, pred win_height));
   ] [] in
-  add_robot world (make_robot [] [make_virtual_actuators world (0, 0, 0)], 10);
+  add_robot world
+    (make_robot [] [make_virtual_actuators world (0, 0, 0)], 10, ref 1, ref 0);
 
   (* Move robot *)
-  (fst (List.nth world.robots 0)).pos <- (win_width/2, win_height/2, 0);
+  let (robot, _, _, _) = List.nth world.robots 0 in
+  robot.pos <- (win_width/2, win_height/2, 90);
 
   while true do
     mouse_add_obstacle world obstacle;

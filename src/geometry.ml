@@ -20,6 +20,8 @@ type box = {
   }
 ;;
 
+let gradient_of_degree x = x *. 2. *. pi /. 360.;;
+
 let print_point (x, y) =
   printf "@[(%d,@ %d)@]" x y
 ;;
@@ -122,7 +124,7 @@ let draw_circle surface color (x, y) r =
 
 let draw_position surface color (x, y, theta) r =
   draw_circle surface color (x, y) r;
-  let theta_ = float_of_int theta in
+  let theta_ = gradient_of_degree (float_of_int theta) in
   let x_ = (cos theta_) *. (float_of_int r) +. float_of_int x
   and y_ = (sin theta_) *. (float_of_int r) +. float_of_int y in
   draw_line color ((x, y), (int_of_float x_, int_of_float y_)) surface
