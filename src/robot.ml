@@ -20,3 +20,7 @@ let make_robot dist_sensors_list actuators_list = {
   dist_sensors = dist_sensors_list;
   actuators = actuators_list
 };;
+
+let add_actuator robot actuator =
+  robot.actuators <- actuator::robot.actuators
+;;

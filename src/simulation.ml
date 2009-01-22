@@ -16,20 +16,26 @@ let make_world obstacles_list robots_list = {
   robots = robots_list;
 };;
 
-let add_robot world robot =
-  world.robots <- robot::world.robots
+let add_robot world robot_cfg =
+  world.robots <- robot_cfg::world.robots
 ;;
 
 let make_obstacle world obstacle =
   world.obstacles <- obstacle::world.obstacles
 ;;
 
-let make_virtual_distance_sensors world position =
+let make_virtual_distance_sensors world robot_cfg position =
   fun () -> 0 (* FIXME: *)
 ;;
 
-let make_virtual_actuators world position =
-  fun n -> () (* FIXME: *)
+let make_virtual_speed_actuator
+    world (robot, r, linear_speed, angular_speed) position =
+  fun n -> linear_speed := n
+;;
+
+let make_virtual_angle_actuator
+    world (robot, r, linear_speed, angular_speed) position =
+  fun n -> angular_speed := n
 ;;
 
 
