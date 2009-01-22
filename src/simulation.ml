@@ -5,7 +5,7 @@ open Robot;;
 
 type world = {
     mutable obstacles : line list;
-    mutable robots : robot list;
+    mutable robots : (robot * int) list;
   }
 ;;
 

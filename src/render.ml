@@ -11,9 +11,8 @@ let render_obstacles surface =
 ;;
 
 let render_robots surface =
-  let draw_robot robot =
-    let (x, y, _) = robot.pos in
-    draw_point surface green (x, y) in
+  let draw_robot (robot, radius) =
+    draw_position surface green robot.pos radius in
   List.iter draw_robot
 ;;
 

@@ -3,6 +3,8 @@
 open Graphics;;
 open Format;;
 
+let pi = 3.1415926535897932384626433832795028841971693992;;
+
 type point = int * int;;
 
 let eq_point (x1, y1) (x2, y2) =
@@ -103,4 +105,25 @@ let draw_line color (p1, p2) surface =
           apply (>) (2*dx-dy) (2*dx) (2*(dx-dy))
             (fun x y -> y := !y + 1)
             (fun x y -> x := !x - 1; y := !y + 1)
+;;
+
+
+let draw_circle surface color (x, y) r =
+  let step = 1. /. (float_of_int r)
+  and i = ref 0. in
+  while !i <= (2. *. pi) do
+    let x_ = (cos !i) *. (float_of_int r) +. float_of_int x
+    and y_ = (sin !i) *. (float_of_int r) +. float_of_int y in
+    draw_point surface color (int_of_float x_, int_of_float y_);
+    i := !i +. step;
+  done
+;;
+
+
+let draw_position surface color (x, y, theta) r =
+  draw_circle surface color (x, y) r;
+  let theta_ = float_of_int theta in
+  let x_ = (cos theta_) *. (float_of_int r) +. float_of_int x
+  and y_ = (sin theta_) *. (float_of_int r) +. float_of_int y in
+  draw_line color ((x, y), (int_of_float x_, int_of_float y_)) surface
 ;;
