@@ -1,0 +1,6 @@
+-*- outline -*-
+
+* Debug distance_sensor,
+* Collision,
+* Intersection (for distance sensor).
+* Use actuator/sensor position.
