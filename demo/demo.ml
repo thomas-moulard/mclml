@@ -8,6 +8,7 @@ open Render;;
 open Robot;;
 open Simulation;;
 
+
 let win_width = 640;;
 let win_height = 480;;
 let win_box = make_box (0, 0) win_width win_height;;
@@ -60,11 +61,11 @@ let main () =
   add_dist_sensor robot
     (make_virtual_distance_sensor world robot_cfg (0, 0, 0));
 
-  robot.pos <- (win_width/2, win_height/2, 45);
+  robot.pos <- (win_width/2, win_height/2, 0);
 
   let speed_actuator = List.nth robot.actuators 1
   and angle_actuator = List.nth robot.actuators 0 in
-  speed_actuator 1; angle_actuator 1;
+  speed_actuator 1; angle_actuator 0;
 
   (* Main loop *)
   try

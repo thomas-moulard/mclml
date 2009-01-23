@@ -3,6 +3,8 @@
 open Graphics;;
 
 open Geometry;;
+open Mcl;;
+open Mcl_render;;
 open Robot;;
 open Simulation;;
 
@@ -12,7 +14,9 @@ let render_obstacles surface =
 
 let render_robots surface =
   let draw_robot_cfg (robot, radius, _, _) =
-    draw_position surface green robot.pos radius in
+    draw_position surface green robot.pos radius;
+    let mcl_positions = localize robot in
+    render_mcl surface mcl_positions in
   List.iter draw_robot_cfg
 ;;
 
