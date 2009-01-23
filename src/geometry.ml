@@ -24,8 +24,8 @@ let wrap_angle = (mod) 360;;
 
 
 let euclidian_distance (x1, y1) (x2, y2) =
-  let d1 = x1 - y1 and d2 = x2 - y2 in
-  int_of_float (sqrt (float_of_int (d1 * d1 + d2 * d2)))
+  let dx = x1 - x2 and dy = y2 - y2 in
+  int_of_float (sqrt (float_of_int (dx * dx + dy * dy)))
 ;;
 
 let gradient_of_degree x = x *. 2. *. pi /. 360.;;

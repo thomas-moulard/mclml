@@ -64,7 +64,7 @@ let main () =
 
   let speed_actuator = List.nth robot.actuators 1
   and angle_actuator = List.nth robot.actuators 0 in
-  speed_actuator 0; angle_actuator 0;
+  speed_actuator 1; angle_actuator 0;
 
   (* Main loop *)
   try
