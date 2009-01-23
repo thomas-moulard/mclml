@@ -1,6 +1,5 @@
 -*- outline -*-
 
-* Debug distance_sensor,
+* Debug distance_sensor (sometimes obstacle not detected?),
+* Implement MCL algorithm,
 * Collision,
-* Intersection (for distance sensor).
-* Use actuator/sensor position.
