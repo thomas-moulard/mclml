@@ -60,11 +60,11 @@ let main () =
   add_dist_sensor robot
     (make_virtual_distance_sensor world robot_cfg (0, 0, 0));
 
-  robot.pos <- (win_width/2, win_height/2, 0);
+  robot.pos <- (win_width/2, win_height/2, 45);
 
   let speed_actuator = List.nth robot.actuators 1
   and angle_actuator = List.nth robot.actuators 0 in
-  speed_actuator 1; angle_actuator 0;
+  speed_actuator 1; angle_actuator 1;
 
   (* Main loop *)
   try

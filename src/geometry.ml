@@ -24,7 +24,7 @@ let wrap_angle = (mod) 360;;
 
 
 let euclidian_distance (x1, y1) (x2, y2) =
-  let dx = x1 - x2 and dy = y2 - y2 in
+  let dx = x1 - x2 and dy = y1 - y2 in
   int_of_float (sqrt (float_of_int (dx * dx + dy * dy)))
 ;;
 
@@ -128,11 +128,20 @@ let draw_line color line surface =
   middle_point_algorithm line (draw_point surface color)
 ;;
 
+(* Normalize to avoid stable positions for low speeds *)
+let floor_ceil xold x =
+  if x > xold then
+    ceil x
+  else
+    floor x
+;;
+
 let point_from_position (x, y, theta) r =
   let t = gradient_of_degree (float_of_int theta) in
   let x_ = (cos t) *. (float_of_int r) +. float_of_int x
   and y_ = (sin t) *. (float_of_int r) +. float_of_int y in
-  (int_of_float x_, int_of_float y_)
+  (int_of_float (floor_ceil (float_of_int x) x_),
+   int_of_float (floor_ceil (float_of_int y) y_))
 ;;
 
 let draw_circle surface color (x, y) r =
@@ -141,7 +150,9 @@ let draw_circle surface color (x, y) r =
   while !i <= (2. *. pi) do
     let x_ = (cos !i) *. (float_of_int r) +. float_of_int x
     and y_ = (sin !i) *. (float_of_int r) +. float_of_int y in
-    draw_point surface color (int_of_float x_, int_of_float y_);
+    draw_point surface color
+      (int_of_float (floor_ceil (float_of_int x) x_),
+       int_of_float (floor_ceil (float_of_int y) y_));
     i := !i +. step;
   done
 ;;

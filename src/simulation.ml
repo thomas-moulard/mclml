@@ -1,5 +1,7 @@
 (* 2d world simulation *)
 
+open Format;;
+
 open Geometry;;
 open Robot;;
 
