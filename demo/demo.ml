@@ -4,6 +4,8 @@ open Format;;
 open Graphics;;
 
 open Geometry;;
+open Mcl;;
+open Mcl_render;;
 open Render;;
 open Robot;;
 open Simulation;;
@@ -53,15 +55,20 @@ let main () =
   ] [] in
 
   (* Initialize robot *)
-  add_robot world (make_robot [] [], 10, ref 0, ref 0);
-  let robot_cfg = List.nth world.robots 0 in
-  let (robot, _, _, _) = robot_cfg in
+  let robots = [make_robot [] []] in
+
+  let robot = List.nth robots 0 in
+  robot.pos <- (win_width/2, win_height/2, 0);
+
+  List.iter (add_robot world) robots;
+
+  let robot_cfg = List.nth world.robots_cfg 0 in
+  let robot = List.nth robots 0 in
   add_actuator robot (make_virtual_speed_actuator world robot_cfg (0, 0, 0));
   add_actuator robot (make_virtual_angle_actuator world robot_cfg (0, 0, 0));
   add_dist_sensor robot
     (make_virtual_distance_sensor world robot_cfg (0, 0, 0));
 
-  robot.pos <- (win_width/2, win_height/2, 0);
 
   let speed_actuator = List.nth robot.actuators 1
   and angle_actuator = List.nth robot.actuators 0 in
@@ -78,7 +85,11 @@ let main () =
 
       mouse_add_obstacle world obstacle;
       update_world world;
-      draw_image (render world win_box) 0 0;
+
+      let surface = init_render_image win_box in
+      render_world surface world;
+      render_mcl surface (localize robot);
+      draw_render surface;
       synchronize ();
     done;
   with Graphic_failure _ -> close_graph ()

@@ -5,21 +5,32 @@ open Format;;
 open Geometry;;
 open Robot;;
 
+let robot_radius = 10;;
+
+(*
+   * REAL position (in the virtual world)
+   * position radius
+   * linear speed
+   * angular speed
+*)
+type robot_configuration =
+    position ref * int * int ref * int ref
+;;
+
 type world = {
     mutable obstacles : line list;
-
-    (* robot * radius * linear speed * angular speed *)
-    mutable robots : (robot * int * int ref * int ref) list;
+    mutable robots_cfg : robot_configuration list;
   }
 ;;
 
-let make_world obstacles_list robots_list = {
+let make_world obstacles_list robots_cfg_list = {
   obstacles = obstacles_list;
-  robots = robots_list;
+  robots_cfg = robots_cfg_list;
 };;
 
-let add_robot world robot_cfg =
-  world.robots <- robot_cfg::world.robots
+let add_robot world robot =
+  let robot_cfg = (ref robot.pos, robot_radius, ref 0, ref 0) in
+  world.robots_cfg <- robot_cfg::world.robots_cfg
 ;;
 
 let make_obstacle world obstacle =
@@ -65,17 +76,17 @@ let intersect_position_obstacles world (x, y, theta) =
 
 
 let make_virtual_distance_sensor
-    world (robot, r, linear_speed, angular_speed) position =
-  fun () -> intersect_position_obstacles world robot.pos
+    world (pos, r, linear_speed, angular_speed) position =
+  fun () -> intersect_position_obstacles world !pos
 ;;
 
 let make_virtual_speed_actuator
-    world (robot, r, linear_speed, angular_speed) position =
+    world (pos, r, linear_speed, angular_speed) position =
   fun n -> linear_speed := n
 ;;
 
 let make_virtual_angle_actuator
-    world (robot, r, linear_speed, angular_speed) position =
+    world (pos, r, linear_speed, angular_speed) position =
   fun n -> angular_speed := n
 ;;
 
@@ -87,11 +98,10 @@ let virtual_robot_move (x, y, theta) linear_speed angular_speed =
 ;;
 
 let update_world world =
-  let rec update_robots = function
+  let rec update_robots_cfg = function
     | [] -> ()
-    | robot_data::robots ->
-        let (robot, _, linear_speed, angular_speed) = robot_data in
-        robot.pos <- virtual_robot_move robot.pos !linear_speed !angular_speed;
-        update_robots robots in
-  update_robots world.robots
+    | (pos, _, linear_speed, angular_speed)::robots_cfg ->
+        pos := virtual_robot_move !pos !linear_speed !angular_speed;
+        update_robots_cfg robots_cfg in
+  update_robots_cfg world.robots_cfg
 ;;
