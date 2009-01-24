@@ -1,5 +1,3 @@
 -*- outline -*-
 
-* Debug distance_sensor (sometimes obstacle not detected?),
-* Implement MCL algorithm,
-* Collision,
+* Add noise to distance senror (cf mcl, simulation, error_model.ml).
