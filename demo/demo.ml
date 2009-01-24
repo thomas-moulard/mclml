@@ -70,13 +70,17 @@ let main () =
   add_dist_sensor robot
     (make_virtual_distance_sensor world robot_cfg (0, 0, 0));
 
-
   let speed_actuator = List.nth robot.actuators 1
   and angle_actuator = List.nth robot.actuators 0 in
-  speed_actuator 1; angle_actuator 0;
 
   let motion_model linear_speed angular_speed position =
     virtual_robot_move position linear_speed angular_speed in
+  let get_distance = intersect_position_obstacles world in
+
+  let controller linear_speed angular_speed =
+    speed_actuator linear_speed;
+    angle_actuator angular_speed;
+    motion_model linear_speed angular_speed in
 
   let positions = initialize_particles 100 robot.pos in
 
@@ -92,13 +96,14 @@ let main () =
       mouse_add_obstacle world obstacle;
       update_world world;
 
-      localize robot positions (motion_model 1 0);
+      localize robot positions (controller 1 1) get_distance;
 
       let surface = init_render_image win_box in
       render_mcl surface positions;
       render_world surface world;
       draw_render surface;
       synchronize ();
+
     done;
   with Graphic_failure _ -> close_graph ()
 ;;

@@ -8,6 +8,8 @@ open Robot;;
 
 let robot_radius = 10;;
 
+let intersection_hash = Hashtbl.create 100;;
+
 (*
    * REAL position (in the virtual world)
    * position radius
@@ -35,11 +37,12 @@ let add_robot world robot =
 ;;
 
 let make_obstacle world obstacle =
-  world.obstacles <- obstacle::world.obstacles
+  world.obstacles <- obstacle::world.obstacles;
+  Hashtbl.clear intersection_hash
 ;;
 
 
-let intersect_position_obstacles world (x, y, theta) =
+let compute_intersect_position_obstacles world (x, y, theta) =
   let search_obstacles_extremi f def =
     let comp_extrema (x_, y_) ((x0,y0),(x1,y1)) =
       (f x_ (f x0 x1), f y_ (f y0 y1)) in
@@ -74,11 +77,32 @@ let intersect_position_obstacles world (x, y, theta) =
   intersect world.obstacles
 ;;
 
+let intersect_position_obstacles world position =
+  try
+    Hashtbl.find intersection_hash position
+  with Not_found ->
+    let res =
+      compute_intersect_position_obstacles world position in
+    Hashtbl.add intersection_hash position res;
+    res
+;;
+
+(* FIXME: test that *)
+let precompute_intersections world ((x, y), w, h) =
+  for y_ = y to pred (y + h) do
+    for x_ = x to pred (x + w) do
+      for t = 0 to 359 do
+        let _ = intersect_position_obstacles world (x_, y_, t) in
+        ()
+      done
+    done
+  done
+;;
 
 
 let make_virtual_distance_sensor
     world (pos, r, linear_speed, angular_speed) position =
-  fun () -> intersect_position_obstacles world !pos
+  fun () -> dist_std_error_model (intersect_position_obstacles world !pos)
 ;;
 
 let make_virtual_speed_actuator

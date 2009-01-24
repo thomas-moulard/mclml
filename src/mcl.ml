@@ -1,5 +1,7 @@
 (* Monte Carlo Localization algorithm *)
 
+open Format;;
+
 open Error_model;;
 open Geometry;;
 open Robot;;
@@ -26,13 +28,13 @@ let normalize positions =
     Array.iteri (fun i (s, p) -> positions.(i) <- (s /. sum, p)) positions
 ;;
 
-let update robot positions =
-  let noise = 1. in
+let update robot positions get_distance =
+  let noise = float_of_int Error_model.delta_dist in
   let new_weight score err =
     score *. exp (err *. err /. 2. *. noise *. noise) in
   let update_pos sensor i (score, position) =
-    let err = 0. in
-    positions.(i) <- (new_weight score err, position) in
+    let err = (get_distance position) - sensor () in
+    positions.(i) <- (new_weight score (float_of_int err), position) in
   let update sensor = Array.iteri (update_pos sensor) positions in
   List.iter (fun sensor -> update sensor) robot.dist_sensors;
   normalize positions
@@ -110,10 +112,16 @@ let resample positions =
 
 (* localize the robot using Monte Carlo Localization algorithm.
    Returns a list of possible position with a score. *)
-let localize robot positions motion_model =
+let localize robot positions motion_model get_distance =
   let ess_threshold = 0.2 *. float_of_int (Array.length positions) in
   predict positions motion_model;
-  update robot positions;
-  if (compute_ess positions < ess_threshold) then
-    resample positions;
+
+  update robot positions get_distance;
+
+  let ess = compute_ess positions in
+  if (ess < ess_threshold) then
+    begin
+      printf "Resample (ess = %f)@\n" ess;
+      resample positions
+    end
 ;;
