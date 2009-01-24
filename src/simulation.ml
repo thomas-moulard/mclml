@@ -2,6 +2,7 @@
 
 open Format;;
 
+open Error_model;;
 open Geometry;;
 open Robot;;
 
@@ -94,7 +95,7 @@ let make_virtual_angle_actuator
 let virtual_robot_move (x, y, theta) linear_speed angular_speed =
   let (x_, y_) =
     point_from_position (x, y, theta) linear_speed in
-  (x_, y_, theta + angular_speed)
+  std_error_model (x_, y_, theta + angular_speed)
 ;;
 
 let update_world world =

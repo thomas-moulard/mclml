@@ -17,6 +17,7 @@ let win_box = make_box (0, 0) win_width win_height;;
 
 
 let init () =
+  Random.init 0;
   open_graph (sprintf " %dx%d" win_width win_height);
   set_window_title "Monte Carlo Localization demo";
   auto_synchronize false;
@@ -74,6 +75,11 @@ let main () =
   and angle_actuator = List.nth robot.actuators 0 in
   speed_actuator 1; angle_actuator 0;
 
+  let motion_model linear_speed angular_speed position =
+    virtual_robot_move position linear_speed angular_speed in
+
+  let positions = initialize_particles 100 robot.pos in
+
   (* Main loop *)
   try
     while true do
@@ -86,9 +92,11 @@ let main () =
       mouse_add_obstacle world obstacle;
       update_world world;
 
+      localize robot positions (motion_model 1 0);
+
       let surface = init_render_image win_box in
+      render_mcl surface positions;
       render_world surface world;
-      render_mcl surface (localize robot);
       draw_render surface;
       synchronize ();
     done;
