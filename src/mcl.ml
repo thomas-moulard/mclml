@@ -6,6 +6,7 @@ open Error_model;;
 open Geometry;;
 open Robot;;
 
+exception Empty_particle_array;;
 exception Lost;;
 
 let initialize_particles n position =
@@ -29,9 +30,12 @@ let normalize positions =
 ;;
 
 let update robot positions get_distance =
-  let noise = float_of_int Error_model.delta_dist in
+  if delta_dist == 0 then
+    raise (Invalid_argument "Null noise.");
+
+  let noise = float_of_int delta_dist in
   let new_weight score err =
-    score *. exp (err *. err /. 2. *. noise *. noise) in
+    score *. exp (-1. *. err *. err /. 2. *. noise *. noise) in
   let update_pos sensor i (score, position) =
     let err = (get_distance position) - sensor () in
     positions.(i) <- (new_weight score (float_of_int err), position) in
@@ -45,10 +49,13 @@ let update robot positions get_distance =
 (* Explained sum of squares *)
 let compute_ess positions =
   let n = float_of_int (Array.length positions) in
+  if (n <= 0.) then
+    raise Empty_particle_array;
+
   let sum = Array.fold_left
-      (fun x (w, p) ->
+      (fun sum (w, p) ->
         let temp = n *. w -. 1. in
-        temp *. temp)
+        sum +. (temp *. temp))
       0. positions in
   n /. (1. +. sum /. n)
 ;;
@@ -59,7 +66,7 @@ let resample positions =
   let q = Array.make n 0. in
 
   if n == 0 then
-    raise (Invalid_argument "Need at least one particle");
+    raise Empty_particle_array;
 
   (* cumulative distribution *)
   Array.iteri
@@ -119,7 +126,7 @@ let localize robot positions motion_model get_distance =
   update robot positions get_distance;
 
   let ess = compute_ess positions in
-  if (ess < ess_threshold) then
+  if (ess < ess_threshold || ess == nan) then
     begin
       printf "Resample (ess = %f)@." ess;
       resample positions
