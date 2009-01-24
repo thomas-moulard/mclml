@@ -87,11 +87,13 @@ let main () =
   (* Main loop *)
   try
     while true do
+(*
       let dist = (List.nth robot.dist_sensors 0) () in
       if dist == max_int then
         printf "No obstacle.@."
       else
         printf "Obstacle (distance: %d)@." dist;
+*)
 
       mouse_add_obstacle world obstacle;
       update_world world;

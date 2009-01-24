@@ -121,7 +121,9 @@ let localize robot positions motion_model get_distance =
   let ess = compute_ess positions in
   if (ess < ess_threshold) then
     begin
-      printf "Resample (ess = %f)@\n" ess;
+      printf "Resample (ess = %f)@." ess;
       resample positions
     end
+  else
+    printf "Ess = %f@." ess;
 ;;

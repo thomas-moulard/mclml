@@ -51,7 +51,11 @@ let make_box pt w h = {
 let get_point surface x y = surface.(y).(x)
 
 let draw_point surface color (x, y) =
-  surface.(y).(x) <- color;
+  let ydim = Array.length surface
+  and xdim = Array.length surface.(0) in
+
+  if x >= 0 && y >= 0 && x < xdim && y < ydim then
+    surface.(y).(x) <- color;
 ;;
 
 
