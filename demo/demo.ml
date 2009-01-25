@@ -98,7 +98,7 @@ let main () =
       mouse_add_obstacle world obstacle;
       update_world world;
 
-      localize robot positions (controller 1 1) get_distance;
+      localize robot positions (controller 3 3) get_distance;
 
       let surface = init_render_image win_box in
       render_mcl surface positions;

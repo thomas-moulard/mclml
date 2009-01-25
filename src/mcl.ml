@@ -35,7 +35,7 @@ let update robot positions get_distance =
 
   let noise = float_of_int delta_dist in
   let new_weight score err =
-    score *. exp (-1. *. err *. err /. 2. *. noise *. noise) in
+    score *. exp ((-1. *. err *. err) /. (2. *. noise *. noise)) in
   let update_pos sensor i (score, position) =
     let err = (get_distance position) - sensor () in
     positions.(i) <- (new_weight score (float_of_int err), position) in
@@ -93,7 +93,7 @@ let resample positions =
 
   let r = Array.make n 0. in
   for i = 0 to pred n do
-    r.(index.(i)) <- (float_of_int x.(i)) /. 32767.;
+    r.(index.(i)) <- (float_of_int x.(i)) /. (2. *. float_of_int n);
   done;
 
   let new_particles = Array.make n (0, 0, 0) in
