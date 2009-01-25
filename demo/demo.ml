@@ -82,23 +82,23 @@ let main () =
     angle_actuator angular_speed;
     motion_model linear_speed angular_speed in
 
+  let _ = controller 1 1 in
+
   let positions = initialize_particles 100 robot.pos in
 
   (* Main loop *)
   try
     while true do
-(*
       let dist = (List.nth robot.dist_sensors 0) () in
       if dist == max_int then
         printf "No obstacle.@."
       else
         printf "Obstacle (distance: %d)@." dist;
-*)
 
       mouse_add_obstacle world obstacle;
       update_world world;
 
-      localize robot positions (controller 3 3) get_distance;
+      localize robot positions (controller 1 1) get_distance;
 
       let surface = init_render_image win_box in
       render_mcl surface positions;
@@ -108,6 +108,7 @@ let main () =
 
     done;
   with Graphic_failure _ -> close_graph ()
+  | Lost -> printf "Robot is lost!@."; close_graph ();
 ;;
 
 main ()

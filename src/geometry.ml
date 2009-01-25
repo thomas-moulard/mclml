@@ -167,3 +167,54 @@ let draw_position surface color (x, y, theta) r =
   let p = point_from_position (x, y, theta) r in
   draw_line color ((x, y), p) surface
 ;;
+
+
+(* Return (a, b, c) such that a*x+b*y=c *)
+let get_line_coeff ((x1, y1), (x2, y2)) =
+  let a = y2 - y1
+  and b = x1 - x2 in
+  (a, b, a * x1 + b * y1)
+;;
+
+exception No_intersection;;
+
+
+let intersect_lines l1 l2 =
+  let (a1, b1, c1) = get_line_coeff l1
+  and (a2, b2, c2) = get_line_coeff l2 in
+
+  let det = a1*b2 - a2*b1 in
+
+  if det == 0 then
+    raise No_intersection
+  else
+    ((b2*c1 - b1*c2)/det, (a1*c2 - a2*c1)/det)
+;;
+
+let in_segment (x, y) ((x0, y0), (x1, y1)) =
+  let xmin = min x0 x1
+  and xmax = max x0 x1
+  and ymin = min y0 y1
+  and ymax = max y0 y1 in
+  xmin <= x && x <= xmax
+    && ymin <= y && y <= ymax
+;;
+
+let intersect_position_line (x, y, theta) s =
+  let (x_, y_) = point_from_position (x, y, theta) 42 in
+  let (xi, yi) = intersect_lines s ((x_, y_), (x, y)) in
+
+  if not (in_segment (xi, yi) s) then
+    raise No_intersection;
+
+  let good_res =
+    match (x < x_, y < y_) with
+    | (true, true) -> x < xi && y < yi
+    | (true, false) -> x < xi && y >= yi
+    | (false, true) -> x >= xi && y < yi
+    | (false, false) -> x >= xi && y >= yi in
+  if good_res then
+    (xi, yi)
+  else
+    raise No_intersection
+;;
