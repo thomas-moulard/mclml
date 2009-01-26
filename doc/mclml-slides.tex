@@ -1,0 +1,325 @@
+\documentclass[compress, mathserif, dvipsnames]{beamer}
+
+\usepackage{beamerthemesplit}
+\usetheme{Warsaw}
+
+\setbeamercolor{uppercol}{fg=white,bg=blue!40}
+\setbeamercolor{lowercol}{fg=black,bg=blue!15}
+\beamertemplateshadingbackground{blue!5}{blue!20}
+
+\usepackage[latin1]{inputenc}
+
+\usepackage{pgf}
+\usepackage{listings}
+
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\usepackage[french]{babel}
+
+\ifx\pdftexversion\undefined
+\usepackage[dvips]{graphicx}
+\else
+\usepackage{graphicx}
+\DeclareGraphicsRule{*}{mps}{*}{}
+\fi
+\usepackage{placeins}
+
+\newcommand{\img}[1]{
+  \includegraphics[width=\textwidth]{#1}
+}
+
+
+% Change the default bottom line to include the page number.
+\defbeamertemplate*{footline}{infolines theme without institution}
+{
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.25\paperwidth,ht=2.25ex,dp=1.125ex,center]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\insertshortauthor
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.50\paperwidth,ht=2.25ex,dp=1.125ex,center]{title in head/foot}%
+      \usebeamerfont{title in head/foot}\insertshorttitle
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.25\paperwidth,ht=2.25ex,dp=1.125ex,right]{date in head/foot}%
+      \usebeamerfont{date in head/foot}%
+      % \insertshortdate{}\hspace*{2em}
+      \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+    \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\bibliographystyle{apalike}
+
+
+\AtBeginSection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Table des matières}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+%% ----------------------------------------------------------------------------
+%% -- Listings
+%% ----------------------------------------------------------------------------
+\title[Algorithme de Monte Carlo]
+      {Implémentation de l'algorithme de localisation de Monte Carlo en OCaml}
+
+\date{03/02/2009}
+\author{Thomas Moulard}
+\institute[MPRI]{Master Parisien de Recherche en Informatique}
+\subject{Implémentation de l'algorithme de localisation de Monte Carlo en OCaml}
+\keywords{monte, carlo, localisation, algorithme, ocaml}
+
+\setbeamertemplate{navigation symbols}{}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+  \frametitle{Table des matières}
+
+  \tableofcontents
+\end{frame}
+
+%% \begin{frame}
+%%   \frametitle{Copying}
+%%
+%%   FIXME : Copyright
+%% \end{frame}
+
+\section{Introduction}
+
+\begin{frame}
+  \frametitle{Localisation et navigation en robotique}
+
+  \begin{block}{Navigation}
+    Action de conduire d'un point à un autre un robot en
+    suivant un chemin donné.
+  \end{block}
+
+  \begin{block}{Localisation}
+    Action de répérer sa position par rapport à un système
+    de référence donné.
+  \end{block}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Localisation et navigation en robotique}
+
+  \begin{block}{Comment localiser un robot?}
+    \begin{itemize}
+    \item Comment définir un repère de référence?
+    \item Comment représenter les mouvements du robot dans ce repère?
+    \end{itemize}
+  \end{block}
+
+  \begin{figure}[htbp]
+    \begin{center}
+      \includegraphics[width=6cm]{fig1.1}
+    \end{center}
+    \caption{\footnotesize Problème de la localisation d'un robot}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Définition du modèle du mouvement}
+
+  \begin{block}{Modèle du mouvement}
+    Vecteur $(X, Y, \theta)$\footnote{cas d'un robot à roues se déplaçant en
+      2D.} représentant la translation des trois coordonnées durant une unité
+    de temps.
+  \end{block}
+
+\begin{columns}
+  \begin{column}{5cm}
+    Modèle du mouvement:
+    $$
+    \left( \begin{array}{ccc}
+      x  \\
+      y \\
+      \theta \end{array} \right) =
+    \left( \begin{array}{ccc}
+      0  \\
+      +4 \\
+      0 \end{array} \right)
+    $$
+
+    Mouvement réel:
+    $$
+    \left( \begin{array}{ccc}
+      x + \eta_x  \\
+      y + \eta_y \\
+      \theta + \eta_\theta \end{array} \right)
+    $$
+
+  \end{column}
+  \begin{column}{5cm}
+    \begin{figure}[htbp]
+      \begin{center}
+        \includegraphics[width=5cm]{fig2.1}
+      \end{center}
+      \caption{\footnotesize Modèle de mouvement}
+    \end{figure}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Algorithme de Monte Carlo}
+
+  \begin{block}{Problème rencontré}
+    \begin{itemize}
+    \item Peut déterminer la vitesse linéaire/angulaire réelle d'un robot
+      (odométrie et encodeurs sur les roues).
+    \item ...cependant ce n'est pas suffisant en pratique (dérapage\ldots).
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{Algorithme de localisation de Monte Carlo}
+    Donne une distribution de positions $(X, Y, \theta)$ associés une
+    probabilité (filtre à particule).  Le mode de la distribution donne
+    l'emplacement réel du robot.
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Algorithme de Monte Carlo}
+
+\begin{columns}
+  \begin{column}{6cm}
+    \begin{block}{Avantages}
+      \begin{itemize}
+      \item Simple.
+      \item Efficace
+      \item Gère les distributions multi-modales (ambiguïté).
+      \end{itemize}
+    \end{block}
+
+    \begin{block}{Limites}
+      \begin{itemize}
+        % FIXME: critère de convergence?
+      \item Peut échouer.
+      \item Doit borner les erreurs.
+      \end{itemize}
+    \end{block}
+  \end{column}
+  \begin{column}{5cm}
+    \begin{figure}[htbp]
+      \begin{center}
+        \includegraphics[width=3cm]{bimodal.png}
+      \end{center}
+      \caption{\footnotesize Distribution bimodale\footnote{Image tirée de Wikipedia.} }
+    \end{figure}
+  \end{column}
+\end{columns}
+\end{frame}
+
+
+\section[MCL]{Algorithme de localisation de Monte Carlo (MCL)}
+
+\begin{frame}
+  \frametitle{Etape 0: initalisation}
+
+  \begin{block}{Initialisation des particules}
+    Soit $N$ le nombre de particules utilisées. Les particules sont placées
+    aléatoirement autour de la position $(0, 0, 0)$ avec une probabilité
+    uniforme $1/N$.
+  \end{block}
+
+    \begin{figure}[htbp]
+      \begin{center}
+        %\includegraphics[width=3cm]{bimodal.png}
+      \end{center}
+      \caption{\footnotesize Initialisation des particules}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Etape 1: mise à jour de la position}
+
+  \begin{block}{Mise à jour des particules}
+  \end{block}
+
+    \begin{figure}[htbp]
+      \begin{center}
+        %\includegraphics[width=3cm]{bimodal.png}
+      \end{center}
+      \caption{\footnotesize Mise à jour des particules}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Etape 2: mise à jour des scores}
+
+  \begin{block}{Mise à jour des scores}
+  \end{block}
+
+    \begin{figure}[htbp]
+      \begin{center}
+        %\includegraphics[width=3cm]{bimodal.png}
+      \end{center}
+      \caption{\footnotesize Mise à jour des scores}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Etape 3: rééchantillonnage}
+
+  \begin{block}{Rééchantillonnage (si nécessaire)}
+  \end{block}
+
+    \begin{figure}[htbp]
+      \begin{center}
+        %\includegraphics[width=3cm]{bimodal.png}
+      \end{center}
+      \caption{\footnotesize Rééchantillonnage}
+    \end{figure}
+\end{frame}
+
+\section{Implémentation}
+
+\begin{frame}
+  \frametitle{MCLML}
+
+%FIXME: dessin des relations entre modules simulation, render, robot, geometry
+\end{frame}
+
+\begin{frame}
+  \frametitle{MCLML}
+
+  FIXME: DEMO! (screenshot?)
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}
+  \frametitle{Conclusion}
+
+  \begin{block}{Bilan}
+    \begin{itemize}
+    \item FIXME:
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{Perspectives}
+    \begin{itemize}
+    \item FIXME: Amélioration: algorithme anytime?
+    \item Généralisation à N dimensions.
+    \item SLAM: implémentation de Wavefront.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Bibliographie}
+
+  \nocite{*}
+  \bibliography{mcl}
+\end{frame}
+
+\end{document}

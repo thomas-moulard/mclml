@@ -8,7 +8,9 @@
 	doc-latex	\
 	doc-man		\
 	doc-texi	\
-	clean
+	clean		\
+	clean-slides	\
+	slides
 
 MKDIR = mkdir -p
 
@@ -30,15 +32,33 @@ demo-byte:
 demo-debug:
 	$(OCAMLBUILD) $(OCAMLBUILD_FLAGS) -ocamlc ocamlcp demo/demo.byte
 
-clean:
+clean: clean-slides
 	rm -rf _build
 
-distclean: clean
+clean-slides:
+	rm -rf	doc/*.aux	\
+		doc/*.bbl	\
+		doc/*.blg	\
+		doc/*.log	\
+		doc/*.mpx	\
+		doc/*.nav	\
+		doc/*.out	\
+		doc/*.pdf	\
+		doc/*.snm	\
+		doc/*.toc	\
+		doc/mpxerr.tex
+
+
+distclean: clean distclean-slides
 	rm -rf doc/dot doc/html doc/latex doc/man doc/texi *.native *.byte
 
-
+distclean-slides:
+	rm -rf doc/*.pdf doc/*.1
 
 doc: doc-dot doc-html doc-latex doc-man doc-texi
+
+slides:
+	cd doc && mpost fig1.mp && mpost fig2.mp && texi2pdf mclml-slides.tex
 
 doc-dot: demo-native
 	$(MKDIR) doc/dot && \

@@ -2,3 +2,15 @@ _build
 *.native
 doc/*/*
 ocamlprof.dump
+
+doc/*.aux
+doc/*.bbl
+doc/*.blg
+doc/*.log
+doc/*.mpx
+doc/*.nav
+doc/*.out
+doc/*.pdf
+doc/*.snm
+doc/*.toc
+doc/mpxerr.tex
