@@ -226,13 +226,13 @@
 
   \begin{block}{Initialisation des particules}
     Soit $N$ le nombre de particules utilisées. Les particules sont placées
-    aléatoirement autour de la position $(0, 0, 0)$ avec une probabilité
-    uniforme $1/N$.
+    aléatoirement autour de la position initiale avec une probabilité
+    uniforme $1/N$ (distribution gaussienne).
   \end{block}
 
     \begin{figure}[htbp]
       \begin{center}
-        %\includegraphics[width=3cm]{bimodal.png}
+        \includegraphics[width=3cm]{step0.1}
       \end{center}
       \caption{\footnotesize Initialisation des particules}
     \end{figure}
@@ -242,11 +242,22 @@
   \frametitle{Etape 1: mise à jour de la position}
 
   \begin{block}{Mise à jour des particules}
+    On utilise le modèle du mouvement pour mettre à jour chaque particule.
+    $$
+    \left( \begin{array}{ccc}
+      x_{n+1}  \\
+      y_{n+1} \\
+      \theta_{n+1} \end{array} \right) =
+    \left( \begin{array}{ccc}
+      x_n + dx + \eta_x  \\
+      y_n + dy + \eta_y \\
+      \theta_n + d\theta + \eta_\theta \end{array} \right)
+    $$
   \end{block}
 
     \begin{figure}[htbp]
       \begin{center}
-        %\includegraphics[width=3cm]{bimodal.png}
+        \includegraphics[width=3cm]{step1.1}
       \end{center}
       \caption{\footnotesize Mise à jour des particules}
     \end{figure}
@@ -256,11 +267,20 @@
   \frametitle{Etape 2: mise à jour des scores}
 
   \begin{block}{Mise à jour des scores}
+    La probabilité associée à chaque particule est inversement proportionnelle
+    à l'erreur de mesure entre les valeurs attendues et réelles de chaque
+    capteur.
+
+    \begin{itemize}
+    \item Pour chaque capteur, pour chaque particule: $score = score * exp^{-err^2/(2*noise^2)}$
+    \item \ldots puis on normalise en divisant par la somme des scores
+      ($\sum_{i=0}^n w_i = 1$).
+    \end{itemize}
   \end{block}
 
     \begin{figure}[htbp]
       \begin{center}
-        %\includegraphics[width=3cm]{bimodal.png}
+        \includegraphics[width=3cm]{step2.1}
       \end{center}
       \caption{\footnotesize Mise à jour des scores}
     \end{figure}
@@ -270,11 +290,14 @@
   \frametitle{Etape 3: rééchantillonnage}
 
   \begin{block}{Rééchantillonnage (si nécessaire)}
+    On calcule $\sum_{i=1}^{n}\left(w_{i}-\bar{w}\right)^2$ (ESS).
+    Si $ESS < seuil$ alors on rééchantilonne (en dupliquant les particules les
+    plus ``saines'').
   \end{block}
 
     \begin{figure}[htbp]
       \begin{center}
-        %\includegraphics[width=3cm]{bimodal.png}
+        \includegraphics[width=3cm]{step3.1}
       \end{center}
       \caption{\footnotesize Rééchantillonnage}
     \end{figure}
@@ -285,13 +308,13 @@
 \begin{frame}
   \frametitle{MCLML}
 
-%FIXME: dessin des relations entre modules simulation, render, robot, geometry
-\end{frame}
-
-\begin{frame}
-  \frametitle{MCLML}
-
-  FIXME: DEMO! (screenshot?)
+  \begin{block}{Démo}
+    \begin{itemize}
+    \item Sans mise à jour des scores.
+    \item Avec un capteur.
+    \item Avec deux capteurs.
+    \end{itemize}
+  \end{block}
 \end{frame}
 
 \section{Conclusion}
@@ -301,15 +324,19 @@
 
   \begin{block}{Bilan}
     \begin{itemize}
-    \item FIXME:
+    \item Algorithme simple, rapide, généralisable facilement\ldots
+    \item \ldots mais algorithme probabiliste, peut échouer dans des cas complexes,
+    \item \ldots ou ne pas pouvoir départager deux positions similaires.
+    \item Simulation limitée par la connaissance ``parfaite'' des obstacles.
     \end{itemize}
   \end{block}
 
   \begin{block}{Perspectives}
     \begin{itemize}
-    \item FIXME: Amélioration: algorithme anytime?
-    \item Généralisation à N dimensions.
-    \item SLAM: implémentation de Wavefront.
+    \item Gérer les ``kidnapping'' (ajouter régulièrement de l'aléa aux particules).
+    \item Implémentation \emph{anytime}.
+    \item \emph{SLAM}: ajout d'une méthode pour cartographier l'environnement
+      en parallèle (Wavefront).
     \end{itemize}
   \end{block}
 \end{frame}
