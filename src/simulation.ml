@@ -78,8 +78,11 @@ let precompute_intersections world ((x, y), w, h) =
 
 
 let make_virtual_distance_sensor
-    world (pos, r, linear_speed, angular_speed) position =
-  fun () -> dist_std_error_model (intersect_position_obstacles world !pos)
+    world (pos, r, linear_speed, angular_speed) (sensor_x, sensor_y, sensor_theta) =
+  fun () ->
+    let (x, y, theta) = !pos in
+    let new_pos = add_position (x, y, theta) (sensor_x, sensor_y, sensor_theta) in
+    dist_std_error_model (intersect_position_obstacles world new_pos)
 ;;
 
 let make_virtual_speed_actuator

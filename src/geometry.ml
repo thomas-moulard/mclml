@@ -7,6 +7,8 @@ let pi = 3.1415926535897932384626433832795028841971693992;;
 
 type point = int * int;;
 
+type position = int * int * int;;
+
 type line = point * point;;
 
 type box = {
@@ -14,6 +16,10 @@ type box = {
     width : int;
     height : int;
   }
+;;
+
+let add_position (x1, y1, theta1) (x2, y2, theta2) =
+  (x1 + x2, y1 + y2, theta1 + theta2)
 ;;
 
 let eq_point (x1, y1) (x2, y2) =

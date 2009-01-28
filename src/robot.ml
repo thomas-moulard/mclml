@@ -1,6 +1,6 @@
 (* Robot definition *)
 
-type position = int * int * int;;
+open Geometry;;
 
 type 'a sensor = unit -> 'a;;
 type actuator = int -> unit;;
