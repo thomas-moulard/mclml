@@ -9,6 +9,14 @@ open Robot;;
 exception Empty_particle_array;;
 exception Lost;;
 
+let print_mcl_particles particles =
+  let print_particle (w, (x, y, theta)) =
+    printf "@[<h>(%d, %d, %d): %f@]@\n" x y theta w in
+  printf "MCL particles:@\n@[<v 1> ";
+  Array.iter print_particle particles;
+  printf "@]@."
+;;
+
 let initialize_particles n position =
   let score = 1. /. (float_of_int n) in
   Array.make n (score, std_error_model position)
@@ -30,17 +38,24 @@ let normalize positions =
 ;;
 
 let update robot positions get_distance =
-  if delta_dist == 0 then
+  if delta_dist == 0. then
     raise (Invalid_argument "Null noise.");
 
-  let noise = float_of_int delta_dist in
   let new_weight score err =
-    score *. exp ((-1. *. err *. err) /. (2. *. noise *. noise)) in
-  let update_pos sensor i (score, position) =
-    let err = (get_distance position) - sensor () in
-    positions.(i) <- (new_weight score (float_of_int err), position) in
-  let update sensor = Array.iteri (update_pos sensor) positions in
-  List.iter (fun sensor -> update sensor) robot.dist_sensors;
+    score *. exp ((-1. *. err *. err) /. (2. *. delta_dist *. delta_dist)) in
+
+  let update_pos (sensor_pos, sensor) i (score, position) =
+    let expected_dist = get_distance (add_position position sensor_pos) in
+    if expected_dist != max_int then
+      begin
+        let err = sensor () - expected_dist in
+        positions.(i) <- (new_weight score (float_of_int err), position)
+      end in
+
+  let update (sensor_pos, sensor) =
+    if sensor () != max_int then
+      Array.iteri (update_pos (sensor_pos, sensor)) positions in
+  List.iter update robot.dist_sensors;
   normalize positions
 ;;
 

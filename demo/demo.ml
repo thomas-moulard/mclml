@@ -45,6 +45,25 @@ let mouse_add_obstacle world point =
   end;
 ;;
 
+let print_sensors robot =
+  let print_sensor ((x, y, theta), sensor) =
+    let dist = sensor () in
+    printf "Sensor (%d, %d, %d): " x y theta;
+    if dist == max_int then
+      printf "no obstacle.@."
+    else
+      printf "obstacle (distance: %d)@." dist in
+  List.iter print_sensor robot.dist_sensors
+;;
+
+let render_all positions world robots =
+  let surface = init_render_image win_box in
+  render_mcl surface positions;
+  render_world surface world robots;
+  draw_render surface;
+  synchronize ();
+;;
+
 let main () =
   init ();
   let obstacle = ref (-1, -1)
@@ -67,8 +86,11 @@ let main () =
   let robot = List.nth robots 0 in
   add_actuator robot (make_virtual_speed_actuator world robot_cfg (0, 0, 0));
   add_actuator robot (make_virtual_angle_actuator world robot_cfg (0, 0, 0));
-  add_dist_sensor robot
+  add_dist_sensor robot (0, 0, 0)
     (make_virtual_distance_sensor world robot_cfg (0, 0, 0));
+  add_dist_sensor robot (0, 0, 90)
+    (make_virtual_distance_sensor world robot_cfg (0, 0, 90));
+
 
   let speed_actuator = List.nth robot.actuators 1
   and angle_actuator = List.nth robot.actuators 0 in
@@ -89,26 +111,29 @@ let main () =
   (* Main loop *)
   try
     while true do
-      let dist = (List.nth robot.dist_sensors 0) () in
-      if dist == max_int then
-        printf "No obstacle.@."
-      else
-        printf "Obstacle (distance: %d)@." dist;
+      printf "+++ New step +++@.";
+      printf "Robot (expected) position: ";
+      print_position robot.pos;
+      printf "@.";
 
+      print_sensors robot;
       mouse_add_obstacle world obstacle;
       update_world world;
 
       localize robot positions (controller 1 1) get_distance;
 
-      let surface = init_render_image win_box in
-      render_mcl surface positions;
-      render_world surface world;
-      draw_render surface;
-      synchronize ();
-
+      render_all  positions world robots
     done;
   with Graphic_failure _ -> close_graph ()
-  | Lost -> printf "Robot is lost!@."; close_graph ();
+  | Lost ->
+      printf "******************@.";
+      printf "* Robot is lost! *@.";
+      printf "******************@.";
+      print_sensors robot;
+      print_mcl_particles positions;
+      while true do
+        render_all  positions world robots
+      done
 ;;
 
 main ()

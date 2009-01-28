@@ -10,7 +10,7 @@ type distance_sensor = int sensor;;
 (* FIXME: simplification one actuator which defines speed *)
 type robot = {
     mutable pos : position;
-    mutable dist_sensors : distance_sensor list;
+    mutable dist_sensors : (position * distance_sensor) list;
     mutable actuators : actuator list;
   }
 ;;
@@ -25,6 +25,6 @@ let add_actuator robot actuator =
   robot.actuators <- actuator::robot.actuators
 ;;
 
-let add_dist_sensor robot sensor =
-  robot.dist_sensors <- sensor::robot.dist_sensors
+let add_dist_sensor robot position sensor =
+  robot.dist_sensors <- (position, sensor)::robot.dist_sensors
 ;;

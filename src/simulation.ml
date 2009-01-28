@@ -78,11 +78,10 @@ let precompute_intersections world ((x, y), w, h) =
 
 
 let make_virtual_distance_sensor
-    world (pos, r, linear_speed, angular_speed) (sensor_x, sensor_y, sensor_theta) =
+    world (pos, r, linear_speed, angular_speed) position =
   fun () ->
-    let (x, y, theta) = !pos in
-    let new_pos = add_position (x, y, theta) (sensor_x, sensor_y, sensor_theta) in
-    dist_std_error_model (intersect_position_obstacles world new_pos)
+    dist_std_error_model
+      (intersect_position_obstacles world (add_position !pos position))
 ;;
 
 let make_virtual_speed_actuator
@@ -99,7 +98,8 @@ let make_virtual_angle_actuator
 let virtual_robot_move (x, y, theta) linear_speed angular_speed =
   let (x_, y_) =
     point_from_position (x, y, theta) linear_speed in
-  std_error_model (x_, y_, theta + angular_speed)
+  let res = std_error_model (x_, y_, wrap_angle (theta + angular_speed)) in
+  res
 ;;
 
 let update_world world =

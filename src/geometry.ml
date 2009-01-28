@@ -18,15 +18,15 @@ type box = {
   }
 ;;
 
+let wrap_angle x = x mod 360;;
+
 let add_position (x1, y1, theta1) (x2, y2, theta2) =
-  (x1 + x2, y1 + y2, theta1 + theta2)
+  (x1 + x2, y1 + y2, wrap_angle (theta1 + theta2))
 ;;
 
 let eq_point (x1, y1) (x2, y2) =
   x1 == x2 && y1 == y2
 ;;
-
-let wrap_angle = (mod) 360;;
 
 
 let euclidian_distance (x1, y1) (x2, y2) =
@@ -38,6 +38,10 @@ let gradient_of_degree x = x *. 2. *. pi /. 360.;;
 
 let print_point (x, y) =
   printf "@[(%d,@ %d)@]" x y
+;;
+
+let print_position (x, y, theta) =
+  printf "@[(%d,@ %d, %d)@]" x y theta
 ;;
 
 let print_line (p1, p2) =
