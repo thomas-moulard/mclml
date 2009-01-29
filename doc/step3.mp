@@ -7,6 +7,16 @@ breite:=wi*u;             % width
 
 rx := 5u;
 ry := 2u;
+radius := 3u;
+
+dy := 2u;
+
+vardef draw_robot (expr rx, ry, c) =
+  pickup pencircle scaled 1.5;
+  draw fullcircle scaled (radius) shifted (rx, ry) withcolor c;
+  draw (rx, ry)--(rx, ry+radius/2) withcolor c;
+enddef;
+
 
 beginfig(1)
   % --- Grid ---
@@ -18,32 +28,16 @@ beginfig(1)
   endfor
   % --- End Grid ---
 
-  % Robot (init)
-  pickup pencircle scaled 1.5;
-  draw fullcircle scaled 3u shifted (rx, ry) withcolor red;
-  draw (rx, ry)--(rx, ry+1.5u) withcolor red;
+  % Obstacle
+  fill (3, hoehe-3)--(breite-3, hoehe-3)--(breite-3, hoehe-6)--(3, hoehe-6)--cycle withcolor .75red;
 
-  % Robot (virtual)
-  pickup pencircle scaled 1.5;
-  draw fullcircle scaled 3u shifted (rx, ry+4u) withcolor blue;
-  draw (rx, ry+4u)--(rx, ry+1.5u+4u) withcolor blue;
+  % Robots
+  draw_robot (rx+0.1u, ry-0.2u+dy, red);
 
-  % Robot (real)
-  pickup pencircle scaled 1.5;
-  draw fullcircle scaled 3u shifted (rx+.5u, ry+4u-.1u) withcolor red;
-  draw (rx+.5u, ry+4u-.1u)--(rx+.5u, ry+1.5u+4u-.1u) withcolor red;
+  draw_robot (rx+0.11u, ry+dy-0.11u, 0.9red);
+  draw_robot (rx-0.2u, ry+dy, 0.9red);
+  draw_robot (rx+0.12u, ry+dy-0.1u, 0.9red);
 
-  % Motion model
-  drawarrow (rx+3u, ry)--(rx+3u, ry+4u) withcolor black;
-
-  % Axis
-  drawarrow (2u, 1u)--(2u, 6u) withcolor black;
-  drawarrow (2u, 1u)--(7u, 1u) withcolor black;
-
-  % Label
-  label.lft(btex $mouvement$ $attendu$ etex, (10.5u, 1.5u));
-
-  label.lft(btex $position$ $attendue$ etex, (3.5u, 7u));
-  label.lft(btex $position$ $du$ $robot$ etex, (10u, 7u));
+  draw_robot (rx, ry+dy, green);
 endfig;
 end
