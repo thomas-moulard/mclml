@@ -91,7 +91,6 @@ let main () =
   add_dist_sensor robot (0, 0, 90)
     (make_virtual_distance_sensor world robot_cfg (0, 0, 90));
 
-
   let speed_actuator = List.nth robot.actuators 1
   and angle_actuator = List.nth robot.actuators 0 in
 
@@ -109,6 +108,7 @@ let main () =
   let positions = initialize_particles 100 robot.pos in
 
   (* Main loop *)
+  let _ = read_key () in
   try
     while true do
       printf "+++ New step +++@.";

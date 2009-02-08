@@ -2,6 +2,7 @@
 	demo-native 	\
 	demo-byte	\
 	demo-debug	\
+	demo-gtk	\
 	doc 		\
 	doc-dot		\
 	doc-html	\
@@ -16,6 +17,7 @@ MKDIR = mkdir -p
 
 OCAMLBUILD = ocamlbuild
 OCAMLBUILD_FLAGS = -I src -lib graphics
+OCAMLBUILD_FLAGS_LABLGTK2 = -cflags -I,+lablgtk2 -lflags -I,+lablgtk2 -lib lablgtk
 
 OCAMLDOC = ocamldoc
 OCAMLDOC_FLAGS = -I _build/src -I src
@@ -31,6 +33,9 @@ demo-byte:
 
 demo-debug:
 	$(OCAMLBUILD) $(OCAMLBUILD_FLAGS) -ocamlc ocamlcp demo/demo.byte
+
+demo-gtk:
+	$(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(OCAMLBUILD_FLAGS_LABLGTK2) demo/demo_gtk.native
 
 clean: clean-slides
 	rm -rf _build
